@@ -45,7 +45,7 @@ def main():
         banner = pyfiglet.figlet_format("VorTex", font="doom")
         print(f"\033[91m{banner}\033[0m")
         print("                                       version 4.1")
-        print("\033[95mCreator: \033[0m Hydra")
+        print("\033[95mCreator: \033[0m S-K1DD13")
         print("")
         
         ip = input("\033[96m🌐 Server IP: \033[0m")
@@ -239,3 +239,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
