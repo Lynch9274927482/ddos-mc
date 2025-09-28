@@ -4,9 +4,9 @@ import threading
 import time
 import os
 import pyfiglet
-import socks  # Make sure to install: pip install PySocks
+import socks  
 
-# RakNet ping packet (basic)
+# RakNet ping packet
 PING_PACKET = b'\x01' + b'\x00' * 17
 
 def clear_screen():
@@ -216,4 +216,5 @@ def main():
             break
 
 if __name__ == "__main__":
+
     main()
