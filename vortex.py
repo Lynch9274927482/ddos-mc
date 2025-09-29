@@ -42,8 +42,18 @@ def monitor_latency_during_attack(ip, port, stop_time, results):
 def main():
     while True:
         clear_screen()
-        banner = pyfiglet.figlet_format("VorTex", font="doom")
-        print(f"\033[91m{banner}\033[0m")
+        print("\033[31m")
+        print("""
+Yb    dP  dP"Yb  88""Yb 888888 888888 Yb  dP 
+ Yb  dP  dP   Yb 88__dP   88   88__    YbdP  
+  YbdP   Yb   dP 88"Yb    88   88""    dPYb  
+   YP     YbodP  88  Yb   88   888888 dP  Yb 
+""")
+        print("\033[0m")
+        print("\033[31m        Minecraft DDoS Tool\033[0m")
+        print("       ")
+        print("       ")
+        print("       ")
         print("\033[95mCreator: \033[0m S-K1DD13")
         print("Compatibility: Bedrock Edition")
         print("")
@@ -239,5 +249,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
