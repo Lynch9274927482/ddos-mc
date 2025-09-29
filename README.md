@@ -162,7 +162,7 @@ This tool is maintained for educational purposes. Responsible disclosure and eth
 
 ## 📄 License
 
-Educational Use Only - See LICENSE file for details.
+Educational Use Only - No funny business...
 
 ---
 
@@ -170,4 +170,3 @@ Educational Use Only - See LICENSE file for details.
 **Creator**: S-K1DD13  
 **Version**: 1.0  
 **Category**: Network Security Testing
-```
