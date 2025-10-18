@@ -1,10 +1,10 @@
-# 🌀 Vortex - Minecraft Bedrock DDoS Tool
+#  Vortex - Minecraft Bedrock DDoS Tool
 
 **Professional-grade latency attack tool for Minecraft Bedrock Edition servers**
 
-> ⚠️ **LEGAL DISCLAIMER**: This tool is for educational and authorized penetration testing purposes only. Unauthorized use against servers you don't own is illegal.
+>  **LEGAL DISCLAIMER**: This tool is for educational and authorized penetration testing purposes only. Unauthorized use against servers you don't own is illegal.
 
-## 🎯 Features
+##  Features
 
 - **Real-time Latency Monitoring** - Track server performance before, during, and after attacks
 - **Proxy Support** - SOCKS5, SOCKS4, and HTTP proxy integration for anonymity
@@ -13,7 +13,7 @@
 - **Server Reconnaissance** - Pre-attack server information gathering
 - **Impact Analysis** - Detailed effectiveness reporting with color-coded ratings
 
-## 📦 Installation
+##  Installation
 
 ### Requirements
 ```bash
@@ -38,14 +38,14 @@ python vortex.py
 - **Custom Delays**: Fine-tune packet timing for optimal impact
 - **Live Metrics**: Watch latency spikes in real-time
 
-## 🎮 Target Compatibility
+##  Target Compatibility
 
-- ✅ **Minecraft Bedrock Edition**
-- ✅ **Windows 10/11 Edition**
-- ✅ **Mobile Editions** (iOS/Android)
-- ✅ **Console Editions** (Xbox, PlayStation, Switch)
+-  **Minecraft Bedrock Edition**
+-  **Windows 10/11 Edition**
+-  **Mobile Editions** (iOS/Android)
+-  **Console Editions** (Xbox, PlayStation, Switch)
 
-## 📊 Attack Metrics
+##  Attack Metrics
 
 The tool provides comprehensive performance analysis:
 
@@ -54,7 +54,7 @@ The tool provides comprehensive performance analysis:
 - **Latency Increase** - Percentage-based impact measurement
 - **Effectiveness Rating** - Color-coded success assessment
 
-## 🛡️ Proxy Configuration
+##  Proxy Configuration
 
 ### Supported Proxy Types
 - **SOCKS5** (Recommended)
@@ -68,14 +68,14 @@ Proxy IP: 127.0.0.1
 Proxy Port: 9050
 ```
 
-## 📈 Effectiveness Ratings
+##  Effectiveness Ratings
 
-- **💀 DEVASTATING** (500%+ latency increase)
-- **🔥 HIGH IMPACT** (200-500% latency increase)
-- **⚠️ MODERATE IMPACT** (50-200% latency increase)
-- **💤 MINIMAL IMPACT** (Below 50% latency increase)
+- ** DEVASTATING** (500%+ latency increase)
+- ** HIGH IMPACT** (200-500% latency increase)
+- ** MODERATE IMPACT** (50-200% latency increase)
+- ** MINIMAL IMPACT** (Below 50% latency increase)
 
-## 🎪 Interface Preview
+##  Interface Preview
 
 ```
 Yb    dP  dP"Yb  88""Yb 888888 888888 Yb  dP 
@@ -105,7 +105,7 @@ Compatibility: Bedrock Edition
 - Progress visualization
 - Impact assessment
 
-## 🔧 Technical Details
+##  Technical Details
 
 ### Protocol
 Uses Minecraft Bedrock's native ping protocol for maximum compatibility
@@ -120,7 +120,7 @@ PING_PACKET = b'\x01' + b'\x00' * 17
 - Non-blocking socket operations
 - Efficient resource management
 
-## 📋 Output Example
+##  Output Example
 
 ```
 📡 Baseline Latency: 45.2 ms
@@ -130,7 +130,7 @@ PING_PACKET = b'\x01' + b'\x00' * 17
 🎯 Attack Effectiveness: 💀 DEVASTATING (100.0%)
 ```
 
-## 🚨 Legal & Ethical Use
+##  Legal & Ethical Use
 
 ### Authorized Scenarios
 - Testing your own servers
@@ -144,7 +144,7 @@ PING_PACKET = b'\x01' + b'\x00' * 17
 - Harassment or griefing
 - Any illegal activities
 
-## 🛠️ Troubleshooting
+##  Troubleshooting
 
 ### Common Issues
 1. **Server appears offline** - Verify IP/port and server status
@@ -156,11 +156,11 @@ PING_PACKET = b'\x01' + b'\x00' * 17
 - Lower delays increase packet frequency
 - Proxy usage may reduce attack speed
 
-## 🤝 Contributing
+##  Contributing
 
 This tool is maintained for educational purposes. Responsible disclosure and ethical use are mandatory.
 
-## 📄 License
+##  License
 
 Educational Use Only - No funny business...
 
